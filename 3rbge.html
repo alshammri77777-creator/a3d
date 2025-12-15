@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>3rbge System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            cursor: default;
+        }
+        
+        body {
+            background: #008080;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .desktop-icons {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+        
+        .desktop-icon {
+            width: 70px;
+            text-align: center;
+            margin-bottom: 20px;
+            color: white;
+            text-shadow: 1px 1px 1px black;
+            font-size: 12px;
+        }
+        
+        .window {
+            position: absolute;
+            background: #ece9d8;
+            border: 3px solid;
+            border-top-color: #f0f0f0;
+            border-left-color: #f0f0f0;
+            border-right-color: #808080;
+            border-bottom-color: #808080;
+            box-shadow: 8px 8px 25px rgba(0,0,0,0.7);
+            min-width: 600px;
+            min-height: 500px;
+            left: 150px;
+            top: 100px;
+            resize: both;
+            overflow: hidden;
+        }
+        
+        .title-bar {
+            background: linear-gradient(to right, #0a246a 0%, #a6caf0 100%);
+            color: white;
+            padding: 10px 15px;
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: move;
+        }
+        
+        .window-controls {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .window-btn {
+            width: 25px;
+            height: 22px;
+            background: linear-gradient(to bottom, #ece9d8 0%, #d4d0c8 100%);
+            border: 1px solid;
+            border-top-color: #f0f0f0;
+            border-left-color: #f0f0f0;
+            border-right-color: #808080;
+            border-bottom-color: #808080;
+            font-size: 12px;
+            line-height: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .close-btn {
+            background: linear-gradient(to bottom, #c94d4d 0%, #a83838 100%);
+            color: white;
+            border-color: #7a2a2a;
+        }
+        
+        .menu-bar {
+            background: #ece9d8;
+            border-bottom: 1px solid #c0c0c0;
+            padding: 4px 8px;
+            font-size: 13px;
+            display: flex;
+            gap: 20px;
+        }
+        
+        .menu-item {
+            padding: 3px 12px;
+            position: relative;
+        }
+        
+        .menu-item:hover {
+            background: #000080;
+            color: white;
+        }
+        
+        .menu-item:hover .dropdown {
+            display: block;
+        }
+        
+        .dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: #ece9d8;
+            border: 2px solid;
+            border-top-color: #f0f0f0;
+            border-left-color: #f0f0f0;
+            border-right-color: #808080;
+            border-bottom-color: #808080;
+            min-width: 180px;
+            display: none;
+            z-index: 1000;
+        }
+        
+        .dropdown-item {
+            padding: 6px 15px;
+            font-size: 12px;
+        }
+        
+        .dropdown-item:hover {
+            background: #000080;
+            color: white;
+        }
+        
+        .content {
+            padding: 25px;
+            color: #000;
+            font-size: 13px;
+            height: calc(100% - 80px);
+            overflow: auto;
+        }
+        
+        .section {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: #f0f0f0;
+            border: 1px solid #c0c0c0;
+            border-radius: 3px;
+        }
+        
+        .section-title {
+            color: #0a246a;
+            font-size: 16px;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #c0c0c0;
+        }
+        
+        .skill-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .skill-item {
+            background: white;
+            border: 1px solid #c0c0c0;
+            padding: 12px;
+            border-radius: 3px;
+        }
+        
+        .skill-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .skill-name {
+            font-weight: bold;
+            color: #0a246a;
+        }
+        
+        .skill-percent {
+            color: #c00;
+            font-weight: bold;
+        }
+        
+        .skill-bar {
+            height: 16px;
+            background: #e0e0e0;
+            border: 1px solid #808080;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .skill-fill {
+            height: 100%;
+            background: linear-gradient(to right, #0a246a, #a6caf0);
+            position: relative;
+        }
+        
+        .skill-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shine 2s infinite;
+        }
+        
+        @keyframes shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .project-card {
+            background: white;
+            border: 1px solid #c0c0c0;
+            padding: 15px;
+            border-radius: 3px;
+            transition: all 0.3s;
+        }
+        
+        .project-card:hover {
+            border-color: #0a246a;
+            box-shadow: 0 0 10px rgba(10, 36, 106, 0.3);
+        }
+        
+        .project-title {
+            color: #0a246a;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .project-desc {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        .taskbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 45px;
+            background: linear-gradient(to top, #245edc 0%, #1a4dc4 10%, #1a4dc4 90%, #245edc 100%);
+            border-top: 1px solid #0a2d7a;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            z-index: 10000;
+        }
+        
+        .start-button {
+            background: linear-gradient(to bottom, #6dc06e 0%, #429942 100%);
+            border: 1px solid #2d672d;
+            border-radius: 4px;
+            color: white;
+            padding: 8px 30px;
+            font-weight: bold;
+            font-size: 14px;
+            margin-right: 15px;
+            box-shadow: inset 1px 1px 0px #8ed58f, 0 2px 3px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .taskbar-icons {
+            display: flex;
+            gap: 4px;
+            margin-left: 10px;
+        }
+        
+        .taskbar-icon {
+            width: 40px;
+            height: 36px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 11px;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+        
+        .taskbar-icon:hover {
+            background: rgba(255,255,255,0.25);
+        }
+        
+        .system-tray {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: white;
+            font-size: 12px;
+            padding: 0 15px;
+        }
+        
+        .time-display {
+            background: rgba(0,0,0,0.2);
+            padding: 5px 15px;
+            border-radius: 3px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .payload-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 99999;
+            display: none;
+            pointer-events: none;
+        }
+        
+        .glitch {
+            animation: glitch 0.1s infinite;
+        }
+        
+        @keyframes glitch {
+            0% { transform: translate(2px, 1px) rotate(0deg); }
+            20% { transform: translate(-1px, 0) rotate(0.5deg); }
+            40% { transform: translate(-1px, 2px) rotate(-0.5deg); }
+            60% { transform: translate(1px, -1px) rotate(0.3deg); }
+            80% { transform: translate(-2px, 1px) rotate(-0.3deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+        
+        .invert {
+            filter: invert(100%) hue-rotate(180deg);
+        }
+        
+        .shake {
+            animation: shake 0.5s infinite;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(-10px) rotate(-1deg); }
+            75% { transform: translateX(10px) rotate(1deg); }
+        }
+        
+        .noise {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.8'/%3E%3C/svg%3E");
+        }
+        
+        .bsod {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #0000aa;
+            color: white;
+            font-family: "Lucida Console", Monaco, monospace;
+            padding: 50px;
+            z-index: 999999;
+            display: none;
+            white-space: pre-wrap;
+            font-size: 16px;
+            line-height: 1.5;
+            overflow: auto;
+        }
+        
+        .signature {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 120px;
+            font-weight: bold;
+            color: red;
+            text-shadow: 3px 3px 0 #000, 0 0 30px #fff;
+            z-index: 1000000;
+            display: none;
+            animation: signaturePulse 0.8s infinite;
+            font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+        }
+        
+        @keyframes signaturePulse {
+            0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.1); }
+        }
+        
+        .matrix-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 999998;
+            display: none;
+            overflow: hidden;
+        }
+        
+        .matrix-char {
+            position: absolute;
+            color: #0f0;
+            font-family: "Courier New", monospace;
+            font-size: 14px;
+            opacity: 0;
+            animation: matrixFall linear infinite;
+        }
+        
+        @keyframes matrixFall {
+            to { transform: translateY(100vh); opacity: 0; }
+        }
+        
+        .terminal {
+            background: #000;
+            color: #0f0;
+            font-family: "Courier New", monospace;
+            padding: 15px;
+            border: 2px solid #0f0;
+            border-radius: 5px;
+            margin: 15px 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .terminal-line {
+            margin-bottom: 5px;
+            font-size: 12px;
+        }
+        
+        .terminal-prompt {
+            color: #0f0;
+            font-weight: bold;
+        }
+        
+        .terminal-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 14px;
+            background: #0f0;
+            animation: blink 1s infinite;
+            vertical-align: middle;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        
+        .status-bar {
+            background: linear-gradient(to right, #0a246a, #a6caf0);
+            color: white;
+            padding: 8px 15px;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            border-radius: 3px;
+        }
+        
+        .tab-container {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #c0c0c0;
+            padding-bottom: 5px;
+        }
+        
+        .tab {
+            padding: 8px 20px;
+            background: #e0e0e0;
+            border: 1px solid #c0c0c0;
+            border-bottom: none;
+            border-radius: 3px 3px 0 0;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .tab.active {
+            background: #f0f0f0;
+            font-weight: bold;
+            border-bottom: 1px solid #f0f0f0;
+            margin-bottom: -1px;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: white;
+            border: 1px solid #c0c0c0;
+            padding: 15px;
+            text-align: center;
+            border-radius: 3px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0a246a;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: "Courier New", monospace;
+            font-size: 12px;
+            margin: 15px 0;
+            overflow-x: auto;
+            border-left: 4px solid #0a246a;
+        }
+        
+        .code-comment {
+            color: #75715e;
+        }
+        
+        .code-keyword {
+            color: #f92672;
+        }
+        
+        .code-string {
+            color: #e6db74;
+        }
+        
+        .code-function {
+            color: #66d9ef;
+        }
+        
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+            margin: 20px 0;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #0a246a;
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .timeline-dot {
+            position: absolute;
+            left: -33px;
+            top: 5px;
+            width: 16px;
+            height: 16px;
+            background: #0a246a;
+            border-radius: 50%;
+            border: 3px solid #ece9d8;
+        }
+        
+        .timeline-date {
+            font-weight: bold;
+            color: #0a246a;
+            margin-bottom: 5px;
+        }
+        
+        .tool-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .tool-item {
+            background: white;
+            border: 1px solid #c0c0c0;
+            padding: 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .tool-icon {
+            width: 24px;
+            height: 24px;
+            background: #0a246a;
+            color: white;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="desktop-icons">
+        <div class="desktop-icon" onclick="openWindow('system')">
+            <div>💻</div>
+            <div>System Info</div>
+        </div>
+        <div class="desktop-icon" onclick="openWindow('projects')">
+            <div>📁</div>
+            <div>Projects</div>
+        </div>
+        <div class="desktop-icon" onclick="openWindow('tools')">
+            <div>⚙️</div>
+            <div>Tools</div>
+        </div>
+        <div class="desktop-icon" onclick="activatePayload()">
+            <div>⚠️</div>
+            <div>Danger Zone</div>
+        </div>
+    </div>
+
+    <div class="window" id="mainWindow">
+        <div class="title-bar">
+            <span>3rbge System Dashboard</span>
+            <div class="window-controls">
+                <button class="window-btn" onclick="minimizeWindow()">_</button>
+                <button class="window-btn" onclick="maximizeWindow()">□</button>
+                <button class="window-btn close-btn" onclick="activatePayload()">✕</button>
+            </div>
+        </div>
+        
+        <div class="menu-bar">
+            <div class="menu-item">
+                File
+                <div class="dropdown">
+                    <div class="dropdown-item" onclick="newDocument()">New</div>
+                    <div class="dropdown-item" onclick="saveDocument()">Save</div>
+                    <div class="dropdown-item" onclick="activatePayload()">Exit</div>
+                </div>
+            </div>
+            <div class="menu-item">
+                Edit
+                <div class="dropdown">
+                    <div class="dropdown-item" onclick="copyText()">Copy</div>
+                    <div class="dropdown-item" onclick="pasteText()">Paste</div>
+                    <div class="dropdown-item" onclick="selectAll()">Select All</div>
+                </div>
+            </div>
+            <div class="menu-item">
+                View
+                <div class="dropdown">
+                    <div class="dropdown-item" onclick="toggleFullscreen()">Fullscreen</div>
+                    <div class="dropdown-item" onclick="zoomIn()">Zoom In</div>
+                    <div class="dropdown-item" onclick="zoomOut()">Zoom Out</div>
+                </div>
+            </div>
+            <div class="menu-item">
+                Tools
+                <div class="dropdown">
+                    <div class="dropdown-item" onclick="openTerminal()">Terminal</div>
+                    <div class="dropdown-item" onclick="scanSystem()">System Scan</div>
+                    <div class="dropdown-item" onclick="activatePayload()">Destruct</div>
+                </div>
+            </div>
+            <div class="menu-item">
+                Help
+                <div class="dropdown">
+                    <div class="dropdown-item" onclick="showAbout()">About</div>
+                    <div class="dropdown-item" onclick="showHelp()">Help</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="tab-container">
+                <div class="tab active" onclick="switchTab('overview')">Overview</div>
+                <div class="tab" onclick="switchTab('skills')">Skills</div>
+                <div class="tab" onclick="switchTab('projects')">Projects</div>
+                <div class="tab" onclick="switchTab('terminal')">Terminal</div>
+                <div class="tab" onclick="switchTab('timeline')">Timeline</div>
+            </div>
+            
+            <div class="tab-content active" id="overview">
+                <div class="section">
+                    <div class="section-title">System Overview</div>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-label">Experience</div>
+                            <div class="stat-value">7+ Years</div>
+                            <div class="stat-desc">Malware Development</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Projects</div>
+                            <div class="stat-value">48</div>
+                            <div class="stat-desc">Completed</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Group Size</div>
+                            <div class="stat-value">A3DAM</div>
+                            <div class="stat-desc">Elite Team</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Status</div>
+                            <div class="stat-value">ACTIVE</div>
+                            <div class="stat-desc">Undetected</div>
+                        </div>
+                    </div>
+                    
+                    <div class="terminal">
+                        <div class="terminal-line">
+                            <span class="terminal-prompt">[3rbge@system ~]$</span> whoami
+                        </div>
+                        <div class="terminal-line">3rbge-admin</div>
+                        <div class="terminal-line">
+                            <span class="terminal-prompt">[3rbge@system ~]$</span> system_status
+                        </div>
+                        <div class="terminal-line">[✓] Process Hidden</div>
+                        <div class="terminal-line">[✓] AV Bypassed</div>
+                        <div class="terminal-line">[✓] Persistence Established</div>
+                        <div class="terminal-line">
+                            <span class="terminal-prompt">[3rbge@system ~]$</span> <span class="terminal-cursor"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">Core Competencies</div>
+                    <div class="skill-container">
+                        <div class="skill-item">
+                            <div class="skill-header">
+                                <span class="skill-name">Python (Advanced Malware)</span>
+                                <span class="skill-percent">70%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-fill" style="width:70%"></div>
+                            </div>
+                            <div style="font-size:11px; color:#666; margin-top:5px;">
+                                RATs, Keyloggers, Packers, Crypters
+                            </div>
+                        </div>
+                        <div class="skill-item">
+                            <div class="skill-header">
+                                <span class="skill-name">C++ (System Exploits)</span>
+                                <span class="skill-percent">50%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-fill" style="width:50%"></div>
+                            </div>
+                            <div style="font-size:11px; color:#666; margin-top:5px;">
+                                Kernel Drivers, Rootkits, Memory Scanners
+                            </div>
+                        </div>
+                        <div class="skill-item">
+                            <div class="skill-header">
+                                <span class="skill-name">C# (RAT Development)</span>
+                                <span class="skill-percent">35%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-fill" style="width:35%"></div>
+                            </div>
+                            <div style="font-size:11px; color:#666; margin-top:5px;">
+                                Remote Administration, Botnets, Stealers
+                            </div>
+                        </div>
+                        <div class="skill-item">
+                            <div class="skill-header">
+                                <span class="skill-name">Web (JS/CSS/HTML)</span>
+                                <span class="skill-percent">20%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-fill" style="width:20%"></div>
+                            </div>
+                            <div style="font-size:11px; color:#666; margin-top:5px;">
+                                Web Exploits, XSS, Phishing Pages
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="skills">
+                <div class="section">
+                    <div class="section-title">Advanced Skills Matrix</div>
+                    <div class="tool-list">
+                        <div class="tool-item">
+                            <div class="tool-icon">P</div>
+                            <div>Python Malware Framework</div>
+                        </div>
+                        <div class="tool-item">
+                            <div class="tool-icon">C</div>
+                            <div>C++ Rootkit Development</div>
+                        </div>
+                        <div class="tool-item">
+                            <div class="tool-icon">#</div>
+                            <div>C# RAT Building</div>
+                        </div>
+                        <div class="tool-item">
+                            <div class="tool-icon">R</div>
+                            <div>Reverse Engineering</div>
+                        </div>
+                        <div class="tool-item">
+                            <div class="tool-icon">E</div>
+                            <div>Exploit Development</div>
+                        </div>
+                        <div class="tool-item">
+                            <div class="tool-icon">M</div>
+                            <div>Memory Analysis</div>
+                        </div>
+                        <div class="tool-item">
+                            <div class="tool-icon">A</div>
+                            <div>AV Evasion Techniques</div>
+                        </div>
+                        <div class="tool-item">
+                            <div class="tool-icon">S</div>
+                            <div>Stealth Persistence</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <div class="section-title">Code Sample - Python RAT</div>
+                    <div class="code-block">
+                        <span class="code-keyword">import</span> socket<br>
+                        <span class="code-keyword">import</span> threading<br>
+                        <span class="code-keyword">import</span> subprocess<br>
+                        <br>
+                        <span class="code-comment"># 3rbge's Custom RAT Core</span><br>
+                        <span class="code-keyword">class</span> <span class="code-function">Backdoor</span>:<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">def</span> <span class="code-function">__init__</span>(<span class="code-keyword">self</span>, host, port):<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">self</span>.connection = socket.socket()<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">self</span>.connection.connect((host, port))<br>
+                        <br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">def</span> <span class="code-function">execute</span>(<span class="code-keyword">self</span>, command):<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return</span> subprocess.check_output(command, shell=<span class="code-keyword">True</span>)<br>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="projects">
+                <div class="section">
+                    <div class="section-title">Recent Projects</div>
+                    <div class="projects-grid">
+                        <div class="project-card">
+                            <div class="project-title">Project Ghost</div>
+                            <div class="project-desc">
+                                Undetectable keylogger with encrypted C2 communication
+                                and anti-debugging techniques.
+                            </div>
+                        </div>
+                        <div class="project-card">
+                            <div class="project-title">Nemesis RAT</div>
+                            <div class="project-desc">
+                                Full-featured Remote Administration Tool with
+                                file manager, screen capture, and persistence.
+                            </div>
+                        </div>
+                        <div class="project-card">
+                            <div class="project-title">Shadow Crypt</div>
+                            <div class="project-desc">
+                                Custom cryptor with polymorphic engine and
+                                multiple encryption layers.
+                            </div>
+                        </div>
+                        <div class="project-card">
+                            <div class="project-title">ZeroDay Scanner</div>
+                            <div class="project-desc">
+                                Automated vulnerability scanner for discovering
+                                and exploiting zero-day vulnerabilities.
+                            </div>
+                        </div>
+                        <div class="project-card">
+                            <div class="project-title">A3DAM Framework</div>
+                            <div class="project-desc">
+                                Complete malware development framework used by
+                                A3DAM group members.
+                            </div>
+                        </div>
+                        <div class="project-card">
+                            <div class="project-title">Stealth Injector</div>
+                            <div class="project-desc">
+                                Process injection tool with multiple injection
+                                methods and AV evasion.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="terminal">
+                <div class="section">
+                    <div class="section-title">A3DAM Terminal</div>
+                    <div class="terminal" style="height:300px;" id="liveTerminal">
+                        <div class="terminal-line">
+                            <span class="terminal-prompt">[3rbge@a3dam ~]$</span> Initializing system...
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="timeline">
+                <div class="section">
+                    <div class="section-title">Operation Timeline</div>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-date">2018</div>
+                            <div>Founded A3DAM Group. Started malware research.</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-date">2019</div>
+                            <div>Released first custom RAT. Developed crypting service.</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-date">2020</div>
+                            <div>Expanded group to 15 members. Started exploit development.</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-date">2021</div>
+                            <div>Developed advanced AV evasion techniques.</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-date">2022</div>
+                            <div>Released complete malware framework for group members.</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="timeline-date">2023-Present</div>
+                            <div>Active development of next-gen malware and research.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="status-bar">
+                <div>System: ONLINE</div>
+                <div>Security: MAXIMUM</div>
+                <div>Last Update: Today 14:23</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="taskbar">
+        <button class="start-button" onclick="toggleStartMenu()">
+            <span>Start</span>
+        </button>
+        
+        <div class="taskbar-icons">
+            <div class="taskbar-icon" onclick="openWindow('system')">💻</div>
+            <div class="taskbar-icon" onclick="openWindow('projects')">📁</div>
+            <div class="taskbar-icon" onclick="openTerminal()">🖥️</div>
+            <div class="taskbar-icon" onclick="activatePayload()">⚠️</div>
+        </div>
+        
+        <div class="system-tray">
+            <div class="time-display">
+                <div id="time">00:00:00</div>
+                <div id="date">18/11/2025</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="payload-overlay" id="payload"></div>
+    <div class="bsod" id="bsod">
+        *** STOP: 0x0000000A (0x00000000, 0x00000002, 0x00000001, 0x82685889)
+        *** IRQL_NOT_LESS_OR_EQUAL
+        
+        *** Address 82685889 base at 82685000 - DateStamp 3ddab9e2 - 3rbge.sys
+        
+        Beginning dump of physical memory...
+        Physical memory dump complete.
+        
+        A3DAM SECURITY PROTOCOL ACTIVATED
+        UNAUTHORIZED ACCESS DETECTED
+        
+        Technical information:
+        
+        *** STOP: 0x0000000A (0x00000000, 0x00000002, 0x00000001, 0x82685889)
+        *** 3rbge.sys - Address 82685889 base at 82685000, DateStamp 3ddab9e2
+        
+        Contact your system administrator or technical support group.
+    </div>
+    <div class="matrix-effect" id="matrix"></div>
+    <div class="signature" id="signature">3rbge</div>
+
+    <script>
+        document.body.style.webkitTouchCallout = 'none';
+        document.body.style.webkitUserSelect = 'none';
+        document.body.style.khtmlUserSelect = 'none';
+        document.body.style.mozUserSelect = 'none';
+        document.body.style.msUserSelect = 'none';
+        
+        let isDragging = false;
+        let currentX, currentY, initialX, initialY;
+        let payloadActive = false;
+        let matrixChars = [];
+        let terminalLines = [];
+        let terminalIndex = 0;
+        
+        const terminalCommands = [
+            "scan_network --range 192.168.1.0/24",
+            "exploit --target 192.168.1.105 --vuln MS17-010",
+            "deploy_payload --type reverse_shell --port 4444",
+            "establish_persistence --method scheduled_task",
+            "exfiltrate_data --target documents --server c2.a3dam.com",
+            "clean_logs --system all",
+            "bypass_defender --technique AMSI",
+            "inject_shellcode --process explorer.exe --payload meterpreter"
+        ];
+        
+        document.getElementById('mainWindow').querySelector('.title-bar').addEventListener('mousedown', function(e) {
+            initialX = e.clientX - this.parentElement.offsetLeft;
+            initialY = e.clientY - this.parentElement.offsetTop;
+            isDragging = true;
+            document.addEventListener('mousemove', dragWindow);
+            document.addEventListener('mouseup', stopDrag);
+        });
+        
+        function dragWindow(e) {
+            if (isDragging) {
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+                const window = document.getElementById('mainWindow');
+                window.style.left = currentX + 'px';
+                window.style.top = currentY + 'px';
+                window.style.transform = 'none';
+            }
+        }
+        
+        function stopDrag() {
+            isDragging = false;
+            document.removeEventListener('mousemove', dragWindow);
+            document.removeEventListener('mouseup', stopDrag);
+        }
+        
+        function minimizeWindow() {
+            const window = document.getElementById('mainWindow');
+            window.style.display = 'none';
+            setTimeout(() => window.style.display = 'block', 2000);
+        }
+        
+        function maximizeWindow() {
+            const window = document.getElementById('mainWindow');
+            if (window.style.width === '90%') {
+                window.style.width = '600px';
+                window.style.height = '500px';
+                window.style.left = '150px';
+                window.style.top = '100px';
+                window.style.transform = 'none';
+            } else {
+                window.style.width = '90%';
+                window.style.height = '85%';
+                window.style.left = '5%';
+                window.style.top = '5%';
+                window.style.transform = 'none';
+            }
+        }
+        
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            document.querySelector(`.tab[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            
+            if (tabName === 'terminal') {
+                startTerminal();
+            }
+        }
+        
+        function startTerminal() {
+            const terminal = document.getElementById('liveTerminal');
+            terminal.innerHTML = '';
+            
+            function addLine(text) {
+                const line = document.createElement('div');
+                line.className = 'terminal-line';
+                line.innerHTML = text;
+                terminal.appendChild(line);
+                terminal.scrollTop = terminal.scrollHeight;
+            }
+            
+            addLine('<span class="terminal-prompt">[3rbge@a3dam ~]$</span> Initializing A3DAM Terminal...');
+            addLine('[✓] Terminal ready');
+            addLine('[✓] Connection established');
+            addLine('[✓] Security protocols active');
+            
+            let cmdIndex = 0;
+            function simulateCommand() {
+                if (cmdIndex < terminalCommands.length) {
+                    addLine(`<span class="terminal-prompt">[3rbge@a3dam ~]$</span> ${terminalCommands[cmdIndex]}`);
+                    setTimeout(() => {
+                        addLine('[✓] Command executed successfully');
+                        cmdIndex++;
+                        simulateCommand();
+                    }, 1000);
+                } else {
+                    addLine('<span class="terminal-prompt">[3rbge@a3dam ~]$</span> <span class="terminal-cursor"></span>');
+                }
+            }
+            
+            setTimeout(simulateCommand, 1000);
+        }
+        
+        function createMatrix() {
+            const matrix = document.getElementById('matrix');
+            matrix.style.display = 'block';
+            matrix.innerHTML = '';
+            matrixChars = [];
+            
+            const chars = "01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン";
+            const width = window.innerWidth;
+            
+            for (let i = 0; i < 150; i++) {
+                const char = document.createElement('div');
+                char.className = 'matrix-char';
+                char.textContent = chars[Math.floor(Math.random() * chars.length)];
+                char.style.left = Math.random() * width + 'px';
+                char.style.top = '-20px';
+                char.style.fontSize = (Math.random() * 20 + 10) + 'px';
+                char.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                char.style.animationDelay = Math.random() * 2 + 's';
+                matrix.appendChild(char);
+                matrixChars.push(char);
+            }
+        }
+        
+        function showSignature() {
+            const sig = document.getElementById('signature');
+            sig.style.display = 'block';
+            sig.style.left = Math.random() * window.innerWidth + 'px';
+            sig.style.top = Math.random() * window.innerHeight + 'px';
+            sig.style.fontSize = (Math.random() * 80 + 60) + 'px';
+            sig.style.color = `rgb(${Math.random()*255},${Math.random()*255},${Math.random()*255})`;
+            setTimeout(() => sig.style.display = 'none', 800);
+        }
+        
+        function activatePayload() {
+            if (payloadActive) return;
+            payloadActive = true;
+            
+            const randomEffect = Math.random();
+            
+            if (randomEffect < 0.3) {
+                const bsod = document.getElementById('bsod');
+                bsod.style.display = 'block';
+                
+                setTimeout(() => {
+                    bsod.style.display = 'none';
+                    payloadActive = false;
+                }, 4000);
+                
+            } else if (randomEffect < 0.6) {
+                createMatrix();
+                
+                setTimeout(() => {
+                    document.getElementById('matrix').style.display = 'none';
+                    payloadActive = false;
+                }, 3000);
+                
+            } else {
+                const payload = document.getElementById('payload');
+                const effects = ['glitch', 'invert', 'shake', 'noise'];
+                let currentEffect = 0;
+                
+                function cycleEffects() {
+                    payload.className = 'payload-overlay ' + effects[currentEffect];
+                    payload.style.display = 'block';
+                    
+                    if (Math.random() > 0.5) showSignature();
+                    
+                    document.body.style.filter = `hue-rotate(${Math.random() * 360}deg) blur(${Math.random()}px)`;
+                    
+                    currentEffect = (currentEffect + 1) % effects.length;
+                }
+                
+                const effectInterval = setInterval(cycleEffects, 100);
+                
+                setTimeout(() => {
+                    clearInterval(effectInterval);
+                    payload.style.display = 'none';
+                    document.body.style.filter = '';
+                    payloadActive = false;
+                }, 3000);
+            }
+        }
+        
+        function blockAction(e) {
+            activatePayload();
+            e.preventDefault();
+            e.stopPropagation();
+            
+            if (e.ctrlKey && e.key === 's') {
+                return false;
+            }
+            
+            return false;
+        }
+        
+        document.addEventListener('copy', blockAction);
+        document.addEventListener('cut', blockAction);
+        document.addEventListener('paste', blockAction);
+        document.addEventListener('contextmenu', blockAction);
+        document.addEventListener('selectstart', blockAction);
+        document.addEventListener('dragstart', blockAction);
+        
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 's') {
+                blockAction(e);
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+                blockAction(e);
+                return false;
+            }
+            if (e.key === 'F12' || e.keyCode === 123) {
+                blockAction(e);
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.key === 'J') {
+                blockAction(e);
+                return false;
+            }
+            if (e.ctrlKey && e.key === 'U') {
+                blockAction(e);
+                return false;
+            }
+            if (e.ctrlKey && e.key === 'C') {
+                blockAction(e);
+                return false;
+            }
+            if (e.ctrlKey && e.key === 'A') {
+                blockAction(e);
+                return false;
+            }
+            if (e.key === 'Escape' || e.keyCode === 27) {
+                blockAction(e);
+                return false;
+            }
+        });
+        
+        setInterval(function() {
+            if (window.outerWidth - window.innerWidth > 200 || window.outerHeight - window.innerHeight > 200) {
+                activatePayload();
+            }
+        }, 1000);
+        
+        function updateDateTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', {hour12: false});
+            const dateStr = now.toLocaleDateString();
+            document.getElementById('time').textContent = timeStr;
+            document.getElementById('date').textContent = dateStr;
+        }
+        
+        function menuFunctions(action) {
+            activatePayload();
+        }
+        
+        function openWindow(type) {
+            switch(type) {
+                case 'system':
+                    switchTab('overview');
+                    break;
+                case 'projects':
+                    switchTab('projects');
+                    break;
+                case 'tools':
+                    switchTab('skills');
+                    break;
+            }
+        }
+        
+        function openTerminal() {
+            switchTab('terminal');
+        }
+        
+        window.onload = function() {
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+            startTerminal();
+        };
+    </script>
+</body>
+</html>
